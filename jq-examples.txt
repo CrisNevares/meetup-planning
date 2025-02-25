@@ -1,0 +1,95 @@
+58 results - 18 files
+
+attachUsbToWslOnBoot.sh:
+   5: CONNECTED_DEVICE=$(echo $USBIPD_STATE | jq -r '.Devices[] | select(.ClientIPAddress != null)')
+  11:     PERSISTED_CONNECTED_DEVICE=$(echo $USBIPD_STATE | jq -r '.Devices[] | select(.PersistedGuid != null and .BusId != null)')
+  14:         BUSID=$(echo $PERSISTED_CONNECTED_DEVICE | jq -r '.BusId')
+
+authorizeNewEC2FileMountInstance.sh:
+  5: AWSAccountId=$(aws sts get-caller-identity --profile $AWSProfile --output json | jq '.Account' -r)
+
+awsRemovePolicyFromRoles.sh:
+  4: AWSAccountId=$(aws sts get-caller-identity --profile $AWSProfile --output json | jq '.Account' -r)
+  9: for i in $(aws iam list-entities-for-policy --policy-arn $PolicyArn --entity-filter Role --profile $AWSProfile --output json | jq -r --arg ClusterName "$ClusterName" '.PolicyRoles[] | select (.RoleName | contains($ClusterName) and contains("NodeInstanceRole")) | .RoleName')
+
+delete-untagged-images.sh:
+  3: Repo="escher";aws ecr list-images --repository-name virtualmga/$Repo --filter tagStatus=UNTAGGED --max-results 100 | jq '{imageIds},.imageDigest' | grep -v null > virtualmga-$Repo\_untagged_images.json;aws ecr batch-delete-image --repository-name virtualmga/$Repo --registry-id 933210741512 --cli-input-json file://virtualmga-$Repo\_untagged_images.json;rm virtualmga-$Repo\_untagged_images.json
+
+flatten.py:
+  3: # Convert ncdu's JSON output to flat JSON easy to process using jq (or 
+
+get-k8s-resource-list.sh:
+   5: NamespaceCount=$(kubectl get namespaces -o json | jq '.items[].metadata.name' -r | wc -l)
+  13: for i in $(kubectl get namespaces -o json | jq '.items[].metadata.name' -r)
+  17:     kubectl get pods -n $i -o json | jq -r '.items[] | select(.status.containerStatuses) | .metadata.namespace as $namespace | .apiVersion as $apiVersion | .metadata.name as $name | .metadata.labels as $labels | .status.containerStatuses[] | "\($namespace)|Container|\($apiVersion)|\($name)-\(.name)|\($labels | to_entries | map(.key + "=" + .value) | join(";"))"' >> k8s-resource-list_results.txt
+
+get-k8s-resource-requests.sh:
+   3: NamespaceCount=$(kubectl get namespaces -o json | jq '.items[].metadata.name' -r | wc -l)
+   9: for i in $(kubectl get namespaces -o json | jq '.items[].metadata.name' -r)
+  12:     kubectl get pods -n $i -o json | jq -r '.items[] | .metadata.namespace as $namespace | .metadata.name as $name | .spec.containers[].resources.requests.cpu as $cpu | .spec.containers[].resources.requests.memory as $memory | .status.containerStatuses[] | "\($namespace)|\($name)-\(.name)|\($cpu)|\($memory))"' >> k8s-resource-requests_results.txt
+
+ka-get-k8s-resource-list.sh:
+   7: NamespaceCount=$(ka "kubectl get namespaces -o json" | tail -n +2 | jq '.items[].metadata.name' -r | wc -l)
+  15: for i in $(ka "kubectl get namespaces -o json" | tail -n +2 | jq '.items[].metadata.name' -r | grep -v 'aks-command')
+
+max-pods-calculator.sh:
+   84:   export AWS_DEFAULT_REGION=$(imds /latest/dynamic/instance-identity/document | jq .region -r)
+  120: HYPERVISOR_TYPE=$(echo $DESCRIBE_INSTANCES_RESULT | jq -r '.Hypervisor')
+  126: DEFAULT_NETWORK_CARD_INDEX=$(echo $DESCRIBE_INSTANCES_RESULT | jq -r '.NetworkInfo.DefaultNetworkCardIndex')
+  127: INSTANCE_MAX_ENIS=$(echo $DESCRIBE_INSTANCES_RESULT | jq -r ".NetworkInfo.NetworkCards[$DEFAULT_NETWORK_CARD_INDEX].MaximumNetworkInterfaces")
+  128: INSTANCE_MAX_ENIS_IPS=$(echo $DESCRIBE_INSTANCES_RESULT | jq -r '.NetworkInfo.Ipv4AddressesPerInterface')
+  149: CPU_COUNT=$(echo $DESCRIBE_INSTANCES_RESULT | jq -r '.CpuCount')
+
+pfxToPem.sh:
+  55: SecretCheck=$(aws secretsmanager list-secrets --filters Key=name,Values=$EnvType/TLS/cert --profile $AWSProfile --region $RegionName --output json | jq -r '.SecretList[].ARN')
+
+update-tls-secret.sh:
+   4: AWSProfile=$(kubectl config view --output json | jq -r --arg KubeContext "$KubeContext" '.users[] | select(.name == $KubeContext) | .user.exec.env[] | select(.name == "AWS_PROFILE") | .value')
+   5: AWSAccountId=$(aws sts get-caller-identity --profile $AWSProfile --output json | jq '.Account' -r)
+  44: TLSCert=$(aws secretsmanager get-secret-value --secret-id $SecretPrefix\/TLS/cert --output json --profile $AWSProfile --region $RegionName | jq '.SecretString' | sed "s/\"//g")
+  45: TLSKey=$(aws secretsmanager get-secret-value --secret-id $SecretPrefix\/TLS/key --output json --profile $AWSProfile --region $RegionName | jq '.SecretString' | sed "s/\"//g")
+  52:     TLSCertVmga=$(aws secretsmanager get-secret-value --secret-id $SecretPrefix/TLS/cert-vmga --output json --profile $AWSProfile --region $RegionName | jq '.SecretString' | sed "s/\"//g")
+  53:     TLSKeyVmga=$(aws secretsmanager get-secret-value --secret-id $SecretPrefix/TLS/key-vmga --output json --profile $AWSProfile --region $RegionName | jq '.SecretString' | sed "s/\"//g")
+  56:     TLSCertSurePud=$(aws secretsmanager get-secret-value --secret-id $SecretPrefix/TLS/cert-surepud --output json --profile $AWSProfile --region $RegionName | jq '.SecretString' | sed "s/\"//g")
+  57:     TLSKeySurePud=$(aws secretsmanager get-secret-value --secret-id $SecretPrefix/TLS/key-surepud --output json --profile $AWSProfile --region $RegionName | jq '.SecretString' | sed "s/\"//g")
+  64:     SecretCheck=$(kubectl get secret --namespace $i --output json | jq -r --arg TLSSecretName "$TLSSecretName" '.items[].metadata | select (.name == $TLSSecretName) | .name')
+  81:         SecretCheck=$(kubectl get secret --namespace $i --output json | jq -r --arg TLSSecretName "$TLSSecretNameVmga" '.items[].metadata | select (.name == $TLSSecretName) | .name')
+  95:         SecretCheck=$(kubectl get secret --namespace $i --output json | jq -r --arg TLSSecretName "$TLSSecretNameSurePud" '.items[].metadata | select (.name == $TLSSecretName) | .name')
+
+archive\ZZDNU_appdynamics-cluster.sh:
+   6: NamespaceCheck=$(kubectl get ns --output json | jq -r '.items[].metadata | select (.name == "appdynamics") | .name')
+  14: SecretCheck=$(kubectl get secrets --namespace appdynamics --output json | jq -r '.items[].metadata | select (.name == "regcred") | .name')
+
+archive\k8s\aws-node-addon.sh:
+  11: OIDCProviderArn=$(aws iam list-open-id-connect-providers --profile $AWSProfile --region $RegionName --output json | jq -r --arg OIDCIssuerId "$OIDCIssuerId" '.OpenIDConnectProviderList[] | select (.Arn | contains($OIDCIssuerId)) | .Arn')
+  21: VpcCniIamServiceAccountCheck=$(eksctl get iamserviceaccount --cluster $ClusterName --namespace kube-system --profile $AWSProfile --region $RegionName --output json | jq -r '.[] | select (.metadata.name == "aws-node") | .status.roleARN')
+  36: VpcCniIamServiceAccountArn=$(eksctl get iamserviceaccount --cluster $ClusterName --namespace kube-system --profile $AWSProfile --region $RegionName --output json | jq -r '.[] | select (.metadata.name == "aws-node") | .status.roleARN')
+  67: # AddonInstallCheck=$(eksctl get addon --name vpc-cni --cluster $ClusterName --profile $AWSProfile --region $RegionName --output json | jq -r '.[] | select (.Status == "ACTIVE") | .Name')
+  73: #     for i in $(eksctl get nodegroups --cluster $ClusterName --output json --profile $AWSProfile --region $RegionName | jq -r '.[].StackName')
+  77: #         aws cloudformation get-template --stack-name $i --output json --profile $AWSProfile --region $RegionName | jq '.TemplateBody' > $i\_Original.json
+  78: #         cat $i\_Original.json | jq 'del(.Resources.NodeInstanceRole.Properties.ManagedPolicyArns[] | select(."Fn::Sub" == "arn:${AWS::Partition}:iam::aws:policy/AmazonEKS_CNI_Policy"))' > $i.json
+
+archive\k8s\coredns-addon.sh:
+  6: AddonInstallCheck=$(eksctl get addon --name coredns --cluster $ClusterName --profile $AWSProfile --region $RegionName --output json | jq -r '.[] | select (.Status == "ACTIVE") | .Name')
+
+archive\k8s\fluentbit_container_insights.sh:
+    7: NamespaceCheck=$(kubectl get namespaces --output json | jq -r '.items[].metadata | select (.name == "amazon-cloudwatch") | .name')
+   15: SecretCheck=$(kubectl get secrets --namespace amazon-cloudwatch --output json | jq -r '.items[].metadata | select (.name == "regcred") | .name')
+   43: ConfigmapCheck=$(kubectl get configmaps --namespace amazon-cloudwatch --output json | jq -r '.items[].metadata | select (.name == "fluent-bit-cluster-info") | .name')
+   73: NamespaceCheck=$(kubectl get namespaces --output json | jq -r '.items[].metadata | select (.name == "aws-observability") | .name')
+   90: for i in $(eksctl get fargateprofiles --cluster $ClusterName --profile $AWSProfile --region $RegionName --output json | jq -r '.[].podExecutionRoleARN' | sort -u | cut -d '/' -f2)
+   95:     CloudFormationStackName=$(aws iam get-role --role-name $i --profile $AWSProfile --region $RegionName --output json | jq -r '.Role.Tags[] | select(.Key == "Name") | .Value' | cut -d '/' -f1)
+   98:     aws cloudformation get-template --stack-name $CloudFormationStackName --profile $AWSProfile --region $RegionName --output json | jq '.TemplateBody' > $CloudFormationStackName\_Original.json
+   99:     CloudFormationStackPolicyCheck=$(cat $CloudFormationStackName\_Original.json | jq --arg IamPolicyName "$IamPolicyName" '.Resources.FargatePodExecutionRole.Properties.ManagedPolicyArns[] | select(.["Fn::Sub"] == "arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/'"$IamPolicyName"'")')
+  102:         cat $CloudFormationStackName\_Original.json | jq --arg IamPolicyName "$IamPolicyName" '.Resources.FargatePodExecutionRole.Properties.ManagedPolicyArns += [{"Fn::Sub": "arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/'"$IamPolicyName"'"}]' > $CloudFormationStackName.json
+
+archive\k8s\kube-proxy-addon.sh:
+  6: KubeProxyVer=$(kubectl get daemonset kube-proxy --namespace kube-system -o json | jq -r '.spec.template.spec.containers[0].image' | cut -d ':' -f2)
+  8: AddonInstallCheck=$(eksctl get addon --name kube-proxy --cluster $ClusterName --profile $AWSProfile --region $RegionName --output json | jq -r '.[] | select (.Status == "ACTIVE") | .Name')
+
+wsl\wsl-init\.bash_logout.sh:
+  13: 	CONNECTED_DEVICE=$(echo $USBIPD_STATE | jq -r '.Devices[] | select(.ClientIPAddress != null)')
+  15: 		BUSID=$(echo $CONNECTED_DEVICE | jq -r '.BusId')
+
+wsl\wsl-init\wsl-init.sh:
+  66: jq \
