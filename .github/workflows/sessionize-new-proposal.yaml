@@ -17,7 +17,7 @@ jobs:
       env:
         SESSIONIZE_SESSION_LIST_URL: ${{ secrets.SESSIONIZE_SESSION_LIST_URL }}
       run: |
-        curl -s $SESSIONIZE_SESSION_LIST_URL | jq -r '.[].sessions[].id' | sort -u | tail -n 1 > $SESSIONIZE_LATEST_SESSION_ID
+        SESSIONIZE_LATEST_SESSION_ID=$(curl -s $SESSIONIZE_SESSION_LIST_URL | jq -r '.[].sessions[].id' | sort -u | tail -n 1)
         if [ -eq "$SESSIONIZE_LATEST_SESSION_ID_PREVIOUS" "$SESSIONIZE_LATEST_SESSION_ID" ]; then
           echo "No new sessions"
         else
