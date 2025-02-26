@@ -24,7 +24,7 @@ jobs:
           echo "New session: $SESSIONIZE_LATEST_SESSION_ID"
           SESSIONIZE_NEW_SESSIONS=$(curl -s $SESSIONIZE_SESSION_LIST_URL | jq -r --arg SESSIONIZE_LATEST_SESSION_ID_PREVIOUS "$SESSIONIZE_LATEST_SESSION_ID_PREVIOUS" '[.[].sessions[] | select(.id > $SESSIONIZE_LATEST_SESSION_ID_PREVIOUS) | {id,title,description}]')
           echo $SESSIONIZE_NEW_SESSIONS | jq -c '.[]' | while read -r object; do
-            curl --location "$SLACK_WEBHOOK_URL" --header 'Content-Type: application/json' --data "$object";
+            curl --location "$SLACK_WEBHOOK_URL" --header 'Content-Type: application/json' --data "$object" -v
             sleep 5
           done
         fi
