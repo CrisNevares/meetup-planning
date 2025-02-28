@@ -12,8 +12,11 @@ jobs:
   retrieve-latest-session:
     name: retrieve-latest-session
     runs-on: ubuntu-latest
+    outputs:
+      SESSIONIZE_LATEST_SESSION_ID_OUTPUT: ${{ steps.retrieve-sessions.outputs.SESSIONIZE_LATEST_SESSION_ID }}
     steps:
-    - name: Retrieve latest session
+    - id: retrieve-sessions
+      name: Retrieve latest session
       env:
         SESSIONIZE_SESSION_LIST_URL: ${{ secrets.SESSIONIZE_SESSION_LIST_URL }}
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -29,3 +32,18 @@ jobs:
             sleep 5
           done
         fi
+        echo "SESSIONIZE_LATEST_SESSION_ID_OUTPUT=$SESSIONIZE_LATEST_SESSION_ID" >> "$GITHUB_OUTPUT"
+  update-github-variable:
+    name: update-github-variable
+    runs-on: ubuntu-latest
+    needs: retrieve-latest-session
+    steps:
+    - id: update-github-variable
+      uses: mmoyaferrer/set-github-variable@v1.0.0
+      env:
+        SESSIONIZE_LATEST_SESSION_ID_INPUT: ${{needs.retrieve-latest-session.outputs.SESSIONIZE_LATEST_SESSION_ID_OUTPUT}}
+      with:
+          name: 'SESSIONIZE_LATEST_SESSION_ID'
+          value: "$SESSIONIZE_LATEST_SESSION_ID_INPUT"
+          repository: CrisNevares/meetup-planning
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
