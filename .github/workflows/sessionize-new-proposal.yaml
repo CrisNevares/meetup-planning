@@ -44,6 +44,6 @@ jobs:
         SESSIONIZE_LATEST_SESSION_ID_INPUT: ${{needs.retrieve-latest-session.outputs.SESSIONIZE_LATEST_SESSION_ID_OUTPUT}}
       with:
           name: 'SESSIONIZE_LATEST_SESSION_ID'
-          value: "$SESSIONIZE_LATEST_SESSION_ID_INPUT"
+          value: $SESSIONIZE_LATEST_SESSION_ID_INPUT
           repository: CrisNevares/meetup-planning
           token: ${{ secrets.REPO_ACCESS_TOKEN }}
