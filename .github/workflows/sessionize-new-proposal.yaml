@@ -13,7 +13,7 @@ jobs:
     name: retrieve-latest-session
     runs-on: ubuntu-latest
     outputs:
-      SESSIONIZE_LATEST_SESSION_ID_OUTPUT: ${{ steps.retrieve-sessions.outputs.SESSIONIZE_LATEST_SESSION_ID }}
+      SESSIONIZE_LATEST_SESSION_ID_OUTPUT: ${{ steps.retrieve-sessions.outputs.SESSIONIZE_LATEST_SESSION_ID_OUTPUT }}
     steps:
     - id: retrieve-sessions
       name: Retrieve latest session
