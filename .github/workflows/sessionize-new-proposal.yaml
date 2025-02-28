@@ -44,5 +44,5 @@ jobs:
       with:
           name: 'SESSIONIZE_LATEST_SESSION_ID'
           value: ${{ env.SESSIONIZE_LATEST_SESSION_ID_INPUT}}
-          repository: ${{ .github.repository }}
+          repository: ${{ github.repository }}
           token: ${{ secrets.REPO_ACCESS_TOKEN }}
