@@ -3,7 +3,7 @@ name: sessionize-new-proposal
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "0 14-23,0-2 * * 1-5" # Every hour between 8AM and 8PM CST, Monday to Friday
 env:
   # Setting an environment variable with the value of a configuration variable
   SESSIONIZE_LATEST_SESSION_ID_PREVIOUS: ${{ vars.SESSIONIZE_LATEST_SESSION_ID }}
